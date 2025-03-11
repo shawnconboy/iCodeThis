@@ -13,7 +13,7 @@ body {
     /* Center vertically */
     height: 100vh;
     /* Full viewport height */
-    background-color: #f0f0f0;
+    background-color: #abc6f3;
     /* Light background for contrast */
 }
 
@@ -22,10 +22,10 @@ body {
     background: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.595);
     text-align: center;
     /* Align text in the center */
-    width: 600px;
+    width: 650px;
 }
 
 .one {
@@ -41,10 +41,12 @@ body {
 }
 
 .information {
-    border: 1px solid;
+    /* border: 1px solid; */
     width: 400px;
     display: flex;
+    flex-direction: column;
     justify-content: left;
+    padding: 10px;
 }
 
 .infoTop {
@@ -53,6 +55,19 @@ body {
 
 .infoTop>p {
     padding: 10px 0px;
+}
+
+.infoBottom {
+    display: flex;
+    justify-content: space-between;
+}
+
+a {
+    text-decoration: none;
+}
+
+li {
+    list-style: none;
 }
 
 .three {
