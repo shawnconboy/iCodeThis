@@ -1,0 +1,46 @@
+/* Reset default margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    /* Center horizontally */
+    align-items: center;
+    /* Center vertically */
+    height: 100vh;
+    /* Full viewport height */
+    background-color: #f0f0f0;
+    /* Light background for contrast */
+}
+
+/* Style the container */
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    /* Align text in the center */
+    width: 600px;
+}
+
+.one {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.three {
+    display: flex;
+    justify-content: space-between;
+}
+
+.price {
+    display: flex;
+    justify-content: space-between;
+    width: 200px;
+}
