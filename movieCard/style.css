@@ -34,6 +34,27 @@ body {
     justify-content: space-between;
 }
 
+.two {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0px;
+}
+
+.information {
+    border: 1px solid;
+    width: 400px;
+    display: flex;
+    justify-content: left;
+}
+
+.infoTop {
+    text-align: left;
+}
+
+.infoTop>p {
+    padding: 10px 0px;
+}
+
 .three {
     display: flex;
     justify-content: space-between;
