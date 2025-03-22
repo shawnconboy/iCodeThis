@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Details - TinyStats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: #ffffff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2563eb;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-link:hover h1 {
+            color: #1d4ed8;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .team-header {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .team-header h2 {
+            color: #1f2937;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .team-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+        }
+
+        .info-item h3 {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item p {
+            color: #1f2937;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .team-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .upcoming-games {
+            margin-top: 2rem;
+        }
+
+        .upcoming-games h3 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .game-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .game-card {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-info {
+            flex: 1;
+        }
+
+        .game-date {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-teams {
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .game-location {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .live-badge {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .players-section {
+            margin-top: 2rem;
+        }
+
+        .players-section h3 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .player-card {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .player-name {
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .player-info {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background-color: #f3f4f6;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        body.dark-mode .header {
+            background-color: #2d2d2d;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode .header h1 {
+            color: #3b82f6;
+        }
+
+        body.dark-mode .back-button {
+            color: #3b82f6;
+        }
+
+        body.dark-mode .team-header,
+        body.dark-mode .game-card,
+        body.dark-mode .player-card {
+            background-color: #2d2d2d;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode .info-item,
+        body.dark-mode .stat-item {
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .info-item h3,
+        body.dark-mode .stat-label {
+            color: #9ca3af;
+        }
+
+        body.dark-mode .info-item p,
+        body.dark-mode .stat-value {
+            color: #ffffff;
+        }
+
+        body.dark-mode .game-date,
+        body.dark-mode .game-location,
+        body.dark-mode .player-info {
+            color: #9ca3af;
+        }
+
+        body.dark-mode .game-teams,
+        body.dark-mode .player-name {
+            color: #ffffff;
+        }
+
+        body.dark-mode .theme-toggle {
+            color: #3b82f6;
+        }
+
+        body.dark-mode .theme-toggle:hover {
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .team-header h2 {
+            color: #ffffff;
+        }
+
+        body.dark-mode .upcoming-games h3,
+        body.dark-mode .players-section h3 {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo-link">
+            <h1>TinyStats</h1>
+        </a>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="back-button" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="team-header">
+            <h2 id="team-name">Loading...</h2>
+            <div class="team-info">
+                <div class="info-item">
+                    <h3>Sport</h3>
+                    <p id="team-sport">-</p>
+                </div>
+                <div class="info-item">
+                    <h3>Age Group</h3>
+                    <p id="team-age">-</p>
+                </div>
+                <div class="info-item">
+                    <h3>Location</h3>
+                    <p id="team-location">-</p>
+                </div>
+                <div class="info-item">
+                    <h3>Coach</h3>
+                    <p id="team-coach">-</p>
+                </div>
+            </div>
+            <div class="team-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="wins">0</div>
+                    <div class="stat-label">Wins</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="losses">0</div>
+                    <div class="stat-label">Losses</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="ties">0</div>
+                    <div class="stat-label">Ties</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="upcoming-games">
+            <h3>Upcoming Games</h3>
+            <div id="upcoming-games" class="game-list">
+                <!-- Games will be dynamically added here -->
+            </div>
+        </div>
+
+        <div class="players-section">
+            <h3>Players</h3>
+            <div id="players-grid" class="players-grid">
+                <!-- Players will be dynamically added here -->
+            </div>
+        </div>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/team.js"></script>
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Check for saved theme preference
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        if (darkMode) {
+            body.classList.add('dark-mode');
+            updateThemeIcon(true);
+        }
+
+        // Theme toggle event listener
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateThemeIcon(isDarkMode);
+        });
+
+        // Update theme icon
+        function updateThemeIcon(isDarkMode) {
+            themeToggle.innerHTML = isDarkMode ? 
+                '<i class="fas fa-sun"></i>' : 
+                '<i class="fas fa-moon"></i>';
+        }
+
+        // Initialize the page when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html> 
