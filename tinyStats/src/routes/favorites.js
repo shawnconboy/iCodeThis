@@ -15,26 +15,41 @@ router.get('/:userId', async (req, res) => {
             };
         }));
         res.json(favoritesWithTeamNames);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 
-// Toggle favorite status
-router.post('/toggle', async (req, res) => {
+// Add a favorite
+router.post('/', async (req, res) => {
     try {
         const { userId, teamId } = req.body;
-        const existingFavorite = await Favorite.findOne({ userId, teamId });
+        const favorite = await Favorite.create({
+            userId,
+            teamId,
+            type: 'team'
+        });
+        res.status(201).json(favorite);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+// Remove a favorite
+router.delete('/:teamId', async (req, res) => {
+    try {
+        const favorite = await Favorite.findOneAndDelete({ 
+            teamId: req.params.teamId,
+            userId: req.query.userId // Get userId from query string
+        });
         
-        if (existingFavorite) {
-            await Favorite.findByIdAndDelete(existingFavorite._id);
-        } else {
-            await Favorite.create({ userId, teamId });
+        if (!favorite) {
+            return res.status(404).json({ message: 'Favorite not found' });
         }
         
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.json({ message: 'Favorite removed successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 

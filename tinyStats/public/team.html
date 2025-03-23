@@ -199,6 +199,13 @@
             padding: 1rem;
             border-radius: 0.5rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .player-name {
@@ -296,6 +303,128 @@
         body.dark-mode .players-section h3 {
             color: #ffffff;
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .player-profile {
+            text-align: center;
+        }
+
+        .player-profile h2 {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .player-profile .player-number {
+            font-size: 1.25rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .player-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            background-color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        /* Dark Mode Modal Styles */
+        body.dark-mode .modal-content {
+            background-color: #1f2937;
+        }
+
+        body.dark-mode .modal-header h2 {
+            color: #f3f4f6;
+        }
+
+        body.dark-mode .modal-close {
+            color: #9ca3af;
+        }
+
+        body.dark-mode .modal-close:hover {
+            background-color: #374151;
+            color: #f3f4f6;
+        }
+
+        body.dark-mode .player-profile h2 {
+            color: #f3f4f6;
+        }
+
+        body.dark-mode .stat-item {
+            background-color: #374151;
+        }
+
+        body.dark-mode .stat-value {
+            color: #60a5fa;
+        }
+
+        body.dark-mode .stat-label {
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body>
@@ -364,6 +493,22 @@
             </div>
         </div>
     </main>
+
+    <!-- Player Profile Modal -->
+    <div id="player-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-player-name"></h2>
+                <button class="modal-close" onclick="closePlayerModal()">&times;</button>
+            </div>
+            <div class="player-profile">
+                <div class="player-number" id="modal-player-number"></div>
+                <div class="player-stats" id="modal-player-stats">
+                    <!-- Stats will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/team.js"></script>

@@ -6,73 +6,52 @@ require('dotenv').config();
 
 const sampleTeams = [
     {
-        name: "Red Dragons",
-        sport: "Soccer",
-        ageGroup: "U12",
-        location: "Springfield",
-        coach: {
-            name: "John Smith",
-            contact: "john.smith@email.com"
-        },
-        players: [
-            { name: "Mike Johnson", number: "1", position: "Goalkeeper" },
-            { name: "David Wilson", number: "2", position: "Defender" },
-            { name: "James Brown", number: "3", position: "Defender" },
-            { name: "Robert Davis", number: "4", position: "Midfielder" },
-            { name: "William Taylor", number: "5", position: "Midfielder" },
-            { name: "Thomas Anderson", number: "6", position: "Forward" }
-        ],
+        name: 'Red Dragons',
+        sport: 'Soccer',
+        ageGroup: 'U14',
+        location: 'New York',
         stats: {
-            wins: 5,
+            wins: 8,
             losses: 2,
             ties: 1
-        }
-    },
-    {
-        name: "Blue Hawks",
-        sport: "Soccer",
-        ageGroup: "U12",
-        location: "Springfield",
-        coach: {
-            name: "Sarah Johnson",
-            contact: "sarah.j@email.com"
         },
         players: [
-            { name: "Alex Thompson", number: "1", position: "Goalkeeper" },
-            { name: "Chris Lee", number: "2", position: "Defender" },
-            { name: "Sam Wilson", number: "3", position: "Defender" },
-            { name: "Ryan Martinez", number: "4", position: "Midfielder" },
-            { name: "Lucas Brown", number: "5", position: "Midfielder" },
-            { name: "Ethan Davis", number: "6", position: "Forward" }
-        ],
-        stats: {
-            wins: 4,
-            losses: 3,
-            ties: 1
-        }
+            { name: 'Mike Johnson', number: 10, position: 'Forward' },
+            { name: 'David Smith', number: 5, position: 'Defender' },
+            { name: 'James Wilson', number: 1, position: 'Goalkeeper' }
+        ]
     },
     {
-        name: "Green Tigers",
-        sport: "Baseball",
-        ageGroup: "U10",
-        location: "Springfield",
-        coach: {
-            name: "Michael Brown",
-            contact: "michael.b@email.com"
-        },
-        players: [
-            { name: "Noah Wilson", number: "1", position: "Pitcher" },
-            { name: "Liam Johnson", number: "2", position: "Catcher" },
-            { name: "Oliver Smith", number: "3", position: "First Base" },
-            { name: "Ethan Davis", number: "4", position: "Second Base" },
-            { name: "Aiden Wilson", number: "5", position: "Shortstop" },
-            { name: "Mason Brown", number: "6", position: "Third Base" }
-        ],
+        name: 'Blue Hawks',
+        sport: 'Baseball',
+        ageGroup: 'U12',
+        location: 'Chicago',
         stats: {
             wins: 6,
+            losses: 3,
+            ties: 0
+        },
+        players: [
+            { name: 'Tom Brown', number: 7, position: 'Pitcher' },
+            { name: 'Sam Davis', number: 3, position: 'Catcher' },
+            { name: 'Alex Lee', number: 9, position: 'Outfield' }
+        ]
+    },
+    {
+        name: 'Green Tigers',
+        sport: 'Basketball',
+        ageGroup: 'U16',
+        location: 'Los Angeles',
+        stats: {
+            wins: 9,
             losses: 1,
             ties: 0
-        }
+        },
+        players: [
+            { name: 'Chris Anderson', number: 23, position: 'Guard' },
+            { name: 'Ryan Miller', number: 45, position: 'Forward' },
+            { name: 'Kevin White', number: 12, position: 'Center' }
+        ]
     }
 ];
 
@@ -112,7 +91,10 @@ const sampleGames = [
 async function seedDatabase() {
     try {
         // Connect to MongoDB
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/tinystats');
+        await mongoose.connect('mongodb://localhost:27017/tinystats', {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
         console.log('Connected to MongoDB');
 
         // Clear existing data
@@ -121,9 +103,9 @@ async function seedDatabase() {
         await Favorite.deleteMany({});
         console.log('Cleared existing data');
 
-        // Insert teams
+        // Insert sample teams
         const teams = await Team.insertMany(sampleTeams);
-        console.log('Inserted teams');
+        console.log('Inserted sample teams:', teams);
 
         // Create games with team references
         const games = await Promise.all(sampleGames.map(async (game, index) => {
@@ -150,7 +132,7 @@ async function seedDatabase() {
         ]);
         console.log('Inserted favorites');
 
-        console.log('Database seeded successfully!');
+        console.log('Database seeded successfully');
         process.exit(0);
     } catch (error) {
         console.error('Error seeding database:', error);

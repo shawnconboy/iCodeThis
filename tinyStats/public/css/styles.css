@@ -121,40 +121,164 @@ body {
 /* Favorites section */
 .favorites-section {
     margin-top: 2rem;
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .favorites-section h3 {
     color: #1f2937;
     margin-bottom: 1rem;
     font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.favorites-section h3 i {
+    color: #2563eb;
+}
+
+.favorites-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+}
+
+.favorite-tab {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-radius: 0.25rem;
+}
+
+.favorite-tab:hover {
+    color: #2563eb;
+    background-color: #f3f4f6;
+}
+
+.favorite-tab.active {
+    color: #2563eb;
+    background-color: #eff6ff;
 }
 
 .favorites-list {
-    display: grid;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
-.favorite-team {
-    background-color: white;
+.player-card {
+    background-color: #f9fafb;
     padding: 1rem;
     border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: transform 0.2s;
 }
 
-.favorite-team h4 {
-    margin: 0;
+.player-card:hover {
+    transform: translateX(4px);
 }
 
-.favorite-team h4 a {
+.player-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.player-name {
+    font-weight: 500;
     color: #1f2937;
-    text-decoration: none;
 }
 
-.favorite-team h4 a:hover {
+.player-details {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.favorite-button {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+}
+
+.favorite-button:hover {
     color: #2563eb;
+    background-color: #eff6ff;
+}
+
+.favorite-button.active {
+    color: #2563eb;
+}
+
+.favorite-button.active i {
+    color: #2563eb;
+}
+
+/* Dark mode styles */
+body.dark-mode .favorites-section {
+    background-color: #1f2937;
+}
+
+body.dark-mode .favorites-section h3 {
+    color: #f9fafb;
+}
+
+body.dark-mode .favorite-tab {
+    color: #9ca3af;
+}
+
+body.dark-mode .favorite-tab:hover {
+    color: #60a5fa;
+    background-color: #374151;
+}
+
+body.dark-mode .favorite-tab.active {
+    color: #60a5fa;
+    background-color: #1e3a8a;
+}
+
+body.dark-mode .player-card {
+    background-color: #374151;
+}
+
+body.dark-mode .player-name {
+    color: #f9fafb;
+}
+
+body.dark-mode .player-details {
+    color: #9ca3af;
+}
+
+body.dark-mode .favorite-button {
+    color: #9ca3af;
+}
+
+body.dark-mode .favorite-button:hover {
+    color: #60a5fa;
+    background-color: #1e3a8a;
+}
+
+body.dark-mode .favorite-button.active {
+    color: #60a5fa;
+}
+
+body.dark-mode .favorite-button.active i {
+    color: #60a5fa;
 }
 
 /* Buttons */

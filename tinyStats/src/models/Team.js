@@ -18,28 +18,13 @@ const teamSchema = new mongoose.Schema({
         required: true
     },
     coach: {
-        name: {
-            type: String,
-            required: true
-        },
-        contact: {
-            type: String,
-            required: true
-        }
+        name: String,
+        contact: String
     },
     players: [{
-        name: {
-            type: String,
-            required: true
-        },
-        number: {
-            type: String,
-            required: true
-        },
-        position: {
-            type: String,
-            required: true
-        }
+        name: String,
+        number: String,
+        position: String
     }],
     stats: {
         wins: {
@@ -54,9 +39,11 @@ const teamSchema = new mongoose.Schema({
             type: Number,
             default: 0
         }
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
-}, {
-    timestamps: true
 });
 
 module.exports = mongoose.model('Team', teamSchema); 

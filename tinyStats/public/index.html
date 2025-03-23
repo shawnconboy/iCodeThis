@@ -7,6 +7,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #16a34a;
+            --primary-hover: #15803d;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --card-bg: #ffffff;
+            --sidebar-bg: #f9fafb;
+            --accent-green: #16a34a;
+            --accent-green-light: #dcfce7;
+            --accent-green-dark: #15803d;
+            --heading-green: #166534;
+        }
+
+        body.dark-mode {
+            --primary-color: #16a34a;
+            --primary-hover: #15803d;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
+            --card-bg: #1a1a1a;
+            --sidebar-bg: #1a1a1a;
+            --heading-green: #22c55e;
+            --input-bg: #2d2d2d;
+            --input-border: #404040;
+            --hover-bg: #2d2d2d;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -32,7 +60,7 @@
         }
 
         .header h1 {
-            color: #2563eb;
+            color: var(--heading-green);
             font-size: 1.5rem;
             font-weight: 700;
         }
@@ -43,7 +71,7 @@
         }
 
         .logo-link:hover h1 {
-            color: #1d4ed8;
+            color: var(--primary-hover);
         }
 
         .main-container {
@@ -53,6 +81,7 @@
             max-width: 1400px;
             margin: 0 auto;
             overflow-x: hidden;
+            position: relative;
         }
 
         .main-content {
@@ -63,24 +92,51 @@
 
         .sidebar {
             width: 300px;
+            background: var(--sidebar-bg);
+            border-left: 1px solid var(--border-color);
             position: sticky;
-            top: 5rem;
-            height: calc(100vh - 5rem);
+            top: 4rem;
             overflow-y: auto;
         }
 
-        .search-container {
-            background-color: white;
+        .search-container,
+        .favorites-section {
+            background-color: var(--card-bg);
             padding: 1.5rem;
             border-radius: 0.5rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
         }
 
-        .search-container h2 {
-            color: #1f2937;
+        .search-container h2,
+        .favorites-section h3 {
+            color: var(--text-primary);
             margin-bottom: 1.5rem;
             font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .favorites-section {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem;
+        }
+
+        .favorites-section h3 {
+            color: var(--text-primary);
+            margin: 0 0 1.5rem 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .favorites-section h3 i {
+            color: #fbbf24;
         }
 
         .search-box {
@@ -92,19 +148,21 @@
         .search-input {
             flex: 1;
             padding: 0.75rem 1rem;
-            border: 2px solid #e5e7eb;
+            border: 2px solid var(--border-color);
             border-radius: 0.5rem;
             font-size: 1rem;
             transition: border-color 0.2s;
+            background-color: var(--card-bg);
+            color: var(--text-primary);
         }
 
         .search-input:focus {
             outline: none;
-            border-color: #2563eb;
+            border-color: var(--primary-color);
         }
 
         .search-button {
-            background-color: #2563eb;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
@@ -116,62 +174,184 @@
         }
 
         .search-button:hover {
-            background-color: #1d4ed8;
+            background-color: var(--primary-hover);
         }
 
-        .favorites-section {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-        }
-
-        .favorites-section h3 {
-            color: #1f2937;
-            margin-bottom: 1rem;
-            font-size: 1.25rem;
+        .favorites-tabs {
             display: flex;
-            align-items: center;
             gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
         }
 
-        .favorites-section h3 i {
-            color: #2563eb;
+        .favorite-tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s;
+            position: relative;
+            font-size: 0.875rem;
+        }
+
+        .favorite-tab:hover {
+            color: var(--primary-color);
+            background-color: var(--accent-green-light);
+        }
+
+        .favorite-tab.active {
+            color: var(--primary-color);
+        }
+
+        .favorite-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-color);
+        }
+
+        .favorites-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
 
         .favorites-list {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .favorite-team {
-            background-color: #f9fafb;
-            padding: 1rem;
+            background-color: var(--sidebar-bg);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+
+        .favorite-team:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .favorite-team .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .favorite-team .team-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .favorite-team .team-link:hover {
+            color: var(--primary-color);
+        }
+
+        .favorite-team p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .favorite-team .team-stats {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .favorite-team .team-stats span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .favorite-team .team-stats-icon {
+            font-size: 1.1em;
+        }
+
+        .favorite-team .favorite-button {
+            background: none;
+            border: none;
+            color: #fbbf24;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .favorite-team .favorite-button:hover {
+            background-color: rgba(251, 191, 36, 0.1);
+        }
+
+        .player-card {
+            background-color: var(--sidebar-bg);
+            padding: 1.5rem;
             border-radius: 0.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 0.875rem;
+            margin: 0;
         }
 
-        .favorite-team:hover {
-            transform: translateX(4px);
+        .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .favorite-team button {
-            background: none;
-            border: none;
-            color: #ef4444;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 0.25rem;
-            transition: background-color 0.2s;
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
         }
 
-        .favorite-team button:hover {
-            background-color: #fee2e2;
+        .player-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .player-details {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Dark mode adjustments */
+        body.dark-mode .favorite-team,
+        body.dark-mode .player-card {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .favorite-team:hover,
+        body.dark-mode .player-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode .favorite-team button:hover {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .favorite-tab:hover {
+            background-color: var(--hover-bg);
         }
 
         .popular-teams {
@@ -182,7 +362,7 @@
         }
 
         .popular-teams h3 {
-            color: #1f2937;
+            color: var(--heading-green);
             margin-bottom: 1rem;
             font-size: 1.25rem;
             display: flex;
@@ -191,7 +371,7 @@
         }
 
         .popular-teams h3 i {
-            color: #2563eb;
+            color: var(--primary-color);
         }
 
         .teams-grid {
@@ -218,26 +398,28 @@
         .team-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 0.75rem;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
         }
 
         .team-sport-icon {
-            width: 24px;
-            height: 24px;
+            margin-right: 0.5rem;
+            font-size: 1.2em;
+            vertical-align: middle;
+            display: inline-block;
         }
 
         .team-header h3 {
             flex: 1;
             font-weight: 600;
-            color: #1f2937;
+            color: var(--heading-green);
             margin: 0;
         }
 
         .share-button {
             background: none;
             border: none;
-            color: #2563eb;
+            color: var(--primary-color);
             cursor: pointer;
             padding: 0.5rem;
             border-radius: 50%;
@@ -245,7 +427,7 @@
         }
 
         .share-button:hover {
-            background-color: rgba(37, 99, 235, 0.1);
+            background-color: var(--accent-green-light);
         }
 
         .team-card p {
@@ -268,10 +450,17 @@
             gap: 0.25rem;
         }
 
+        .team-stats-icon {
+            margin-right: 0.25rem;
+            font-size: 1.1em;
+            vertical-align: middle;
+            display: inline-block;
+        }
+
         .theme-toggle {
             background: none;
             border: none;
-            color: #2563eb;
+            color: var(--primary-color);
             font-size: 1.25rem;
             cursor: pointer;
             padding: 0.5rem;
@@ -280,7 +469,35 @@
         }
 
         .theme-toggle:hover {
-            background-color: #f3f4f6;
+            background-color: var(--accent-green-light);
+        }
+
+        .favorite-button {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .favorite-button:hover {
+            color: #fbbf24;
+            background-color: rgba(251, 191, 36, 0.1);
+        }
+
+        .favorite-button.active {
+            color: #fbbf24;
+        }
+
+        .favorite-button.active:hover {
+            color: #d97706;
+            background-color: rgba(251, 191, 36, 0.2);
+        }
+
+        .favorite-button i {
+            font-size: 1.25rem;
         }
 
         /* Dark Mode Styles */
@@ -295,35 +512,22 @@
         }
 
         body.dark-mode .header h1 {
-            color: #3b82f6;
-        }
-
-        body.dark-mode .search-container,
-        body.dark-mode .favorites-section,
-        body.dark-mode .popular-teams {
-            background-color: #2d2d2d;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-
-        body.dark-mode .search-container h2,
-        body.dark-mode .favorites-section h3,
-        body.dark-mode .popular-teams h3 {
-            color: #ffffff;
+            color: var(--heading-green);
         }
 
         body.dark-mode .search-input {
-            background-color: #1a1a1a;
-            border-color: #404040;
-            color: #ffffff;
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text-primary);
         }
 
         body.dark-mode .search-input:focus {
-            border-color: #3b82f6;
+            border-color: var(--primary-color);
+            background-color: var(--input-bg);
         }
 
-        body.dark-mode .favorite-team,
-        body.dark-mode .team-card {
-            background-color: #1a1a1a;
+        body.dark-mode .search-input::placeholder {
+            color: var(--text-secondary);
         }
 
         body.dark-mode .team-name {
@@ -335,19 +539,15 @@
         }
 
         body.dark-mode .theme-toggle {
-            color: #3b82f6;
+            color: var(--primary-color);
         }
 
         body.dark-mode .theme-toggle:hover {
-            background-color: #1a1a1a;
-        }
-
-        body.dark-mode .favorite-team button:hover {
-            background-color: #2d2d2d;
+            background-color: var(--hover-bg);
         }
 
         body.dark-mode .team-header h3 {
-            color: #ffffff;
+            color: var(--heading-green);
         }
 
         body.dark-mode .team-card p {
@@ -359,11 +559,11 @@
         }
 
         body.dark-mode .share-button {
-            color: #3b82f6;
+            color: var(--primary-color);
         }
 
         body.dark-mode .share-button:hover {
-            background-color: #2d2d2d;
+            background-color: var(--hover-bg);
         }
 
         @media (max-width: 768px) {
@@ -392,7 +592,7 @@
         }
 
         .live-games h3 {
-            color: #1f2937;
+            color: var(--heading-green);
             margin-bottom: 1rem;
             font-size: 1.25rem;
             display: flex;
@@ -414,11 +614,12 @@
         .live-games-grid {
             display: flex;
             gap: 1rem;
-            width: 100%;
             overflow-x: auto;
-            padding-bottom: 0.5rem;
+            padding-bottom: 1rem;
             scrollbar-width: thin;
             scrollbar-color: #cbd5e1 #f1f5f9;
+            margin: 0 -1rem;
+            -webkit-overflow-scrolling: touch;
         }
 
         .live-games-grid::-webkit-scrollbar {
@@ -431,103 +632,347 @@
         }
 
         .live-games-grid::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
+            background: #cbd5e1;
             border-radius: 3px;
         }
 
         .live-games-grid::-webkit-scrollbar-thumb:hover {
-            background-color: #94a3b8;
+            background: #94a3b8;
         }
 
         .live-game-card {
-            background-color: #f9fafb;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #ef4444;
-            transition: transform 0.2s, box-shadow 0.2s;
+            flex: 0 0 300px;
             min-width: 300px;
-            flex-shrink: 0;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark mode adjustments */
+        body.dark-mode .live-games-grid {
+            scrollbar-color: #374151 #1f2937;
+        }
+
+        body.dark-mode .live-games-grid::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        body.dark-mode .live-games-grid::-webkit-scrollbar-thumb {
+            background: #374151;
+        }
+
+        body.dark-mode .live-games-grid::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
         }
 
         .game-teams {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding: 0 0.5rem;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1rem 0;
         }
 
         .game-team {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            min-width: 0;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
         }
 
-        .game-team span {
-            font-size: 1.1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .game-team:hover {
+            background-color: var(--accent-green-light);
+        }
+
+        .team-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            flex: 1;
+        }
+
+        .team-link:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
         }
 
         .team-score {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: 600;
             color: #1f2937;
-            padding: 0 0.5rem;
+            min-width: 3rem;
+            text-align: center;
         }
 
-        .game-info {
+        .game-status {
             display: flex;
             justify-content: space-between;
             color: #6b7280;
             font-size: 0.875rem;
             margin-top: 0.75rem;
-            padding: 0 1rem;
+            padding: 0.5rem;
+            background-color: #f3f4f6;
+            border-radius: 0.25rem;
         }
 
-        .game-status {
+        .game-time {
             color: #ef4444;
             font-weight: 500;
         }
 
-        /* Dark Mode Styles */
-        body.dark-mode .live-games {
-            background-color: #2d2d2d;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        .live-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #ef4444;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
         }
 
-        body.dark-mode .live-games h3 {
-            color: #ffffff;
-        }
-
+        /* Dark mode styles */
         body.dark-mode .live-game-card {
-            background-color: #1a1a1a;
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .game-team:hover {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .team-link {
+            color: var(--primary-color);
+        }
+
+        body.dark-mode .team-link:hover {
+            color: var(--primary-hover);
         }
 
         body.dark-mode .team-score {
             color: #ffffff;
         }
 
-        body.dark-mode .game-info {
+        body.dark-mode .game-status {
+            color: #9ca3af;
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .game-time {
+            color: #f87171;
+        }
+
+        .team-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .favorite-button,
+        .share-button {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .favorite-button:hover {
+            color: #fbbf24;
+            background-color: rgba(251, 191, 36, 0.1);
+        }
+
+        .share-button:hover {
+            color: #2563eb;
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .favorite-button i,
+        .share-button i {
+            font-size: 1.25rem;
+        }
+
+        .matching-players {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .matching-players h4 {
+            color: #4b5563;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .matching-players ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .matching-players li {
+            color: #6b7280;
+            font-size: 0.875rem;
+            padding: 0.25rem 0;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode .matching-players {
+            border-top-color: #374151;
+        }
+
+        body.dark-mode .matching-players h4 {
             color: #9ca3af;
         }
 
-        body.dark-mode .live-games-grid {
-            scrollbar-color: #404040 #2d2d2d;
+        body.dark-mode .matching-players li {
+            color: #9ca3af;
         }
 
-        body.dark-mode .live-games-grid::-webkit-scrollbar-track {
-            background: #2d2d2d;
+        /* Dark mode adjustments */
+        body.dark-mode .favorites-section {
+            background-color: var(--card-bg);
         }
 
-        body.dark-mode .live-games-grid::-webkit-scrollbar-thumb {
-            background-color: #404040;
+        /* Dark mode adjustments */
+        body.dark-mode .popular-teams,
+        body.dark-mode .live-games,
+        body.dark-mode .team-card,
+        body.dark-mode .live-game-card {
+            background-color: var(--card-bg);
         }
 
-        body.dark-mode .live-games-grid::-webkit-scrollbar-thumb:hover {
-            background-color: #4b5563;
+        body.dark-mode .team-card {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .favorite-team,
+        body.dark-mode .player-card {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .favorite-team:hover,
+        body.dark-mode .player-card:hover,
+        body.dark-mode .team-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode .favorite-team button:hover {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .favorite-tab:hover {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .theme-toggle:hover {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .share-button:hover {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .favorite-button:hover {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .favorite-button.active {
+            color: #fbbf24;
+        }
+
+        body.dark-mode .favorite-button.active:hover {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .game-team:hover {
+            background-color: var(--hover-bg);
+        }
+
+        body.dark-mode .game-status {
+            background-color: var(--hover-bg);
+        }
+
+        .search-section {
+            margin-bottom: 2rem;
+        }
+
+        .search-section h3 {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-section .player-card {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-section .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-section .player-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .search-section .player-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .search-section .player-details {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .search-section .player-team {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .search-section .favorite-button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .search-section .favorite-button.active {
+            color: #fbbf24;
+        }
+
+        .search-section .favorite-button:hover {
+            color: #fbbf24;
+        }
+
+        /* Dark mode adjustments */
+        body.dark-mode .search-section .player-card {
+            background-color: var(--hover-bg);
+            border-color: var(--border-color);
+        }
+
+        body.dark-mode .search-section .player-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -549,6 +994,9 @@
                     <input type="text" class="search-input" placeholder="Search for your team or game...">
                     <button class="search-button">Search</button>
                 </div>
+                <div id="search-results" class="search-results">
+                    <!-- Search results will be dynamically added here -->
+                </div>
             </div>
 
             <div class="live-games">
@@ -569,8 +1017,15 @@
         <aside class="sidebar">
             <div class="favorites-section">
                 <h3><i class="fas fa-star"></i> Your Favorites</h3>
-                <div id="favorites-list" class="favorites-list">
+                <div class="favorites-tabs">
+                    <button class="favorite-tab active" data-tab="teams">Teams</button>
+                    <button class="favorite-tab" data-tab="players">Players</button>
+                </div>
+                <div id="favorites-teams" class="favorites-list">
                     <!-- Favorite teams will be dynamically added here -->
+                </div>
+                <div id="favorites-players" class="favorites-list" style="display: none;">
+                    <!-- Favorite players will be dynamically added here -->
                 </div>
             </div>
         </aside>

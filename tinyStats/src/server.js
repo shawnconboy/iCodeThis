@@ -39,13 +39,17 @@ app.get(['/team', '/team.html'], (req, res) => {
 });
 
 // API Routes
-const teamsRouter = require('./routes/teams');
+const teamRoutes = require('./routes/teams');
 const gamesRouter = require('./routes/games');
-const favoritesRouter = require('./routes/favorites');
+const favoritesRoutes = require('./routes/favorites');
+const playerFavoritesRoutes = require('./routes/playerFavorites');
+const playersRoutes = require('./routes/players');
 
-app.use('/api/teams', teamsRouter);
+app.use('/api/teams', teamRoutes);
 app.use('/api/games', gamesRouter);
-app.use('/api/favorites', favoritesRouter);
+app.use('/api/favorites/players', playerFavoritesRoutes);
+app.use('/api/favorites', favoritesRoutes);
+app.use('/api/players', playersRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

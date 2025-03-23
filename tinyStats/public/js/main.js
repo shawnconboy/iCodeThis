@@ -1,43 +1,47 @@
 // Connect to Socket.IO
 const socket = io();
 
-// DOM Elements
-const searchInput = document.querySelector('.search-input');
-const searchButton = document.querySelector('.search-button');
-const searchResults = document.getElementById('search-results');
-const favoritesList = document.getElementById('favorites-list');
-const recentlyViewedList = document.getElementById('recently-viewed-list');
-const filterButtons = document.querySelectorAll('.filter-button');
-const themeToggle = document.getElementById('theme-toggle');
-const popularTeamsGrid = document.getElementById('popular-teams');
-const liveGamesGrid = document.getElementById('live-games');
-
 // State
 let currentFilter = 'all';
 let recentlyViewedTeams = JSON.parse(localStorage.getItem('recentlyViewedTeams') || '[]');
 let currentUser = localStorage.getItem('userId') || generateUserId();
 let favoriteTeams = [];
+let favoritePlayers = [];
 let userPreferences = {
     darkMode: localStorage.getItem('darkMode') === 'true'
 };
 
-// Theme Management
-if (userPreferences.darkMode) {
-    document.body.classList.add('dark-mode');
-    updateThemeIcon(true);
+// DOM Elements
+let searchInput;
+let searchButton;
+let searchResults;
+let favoritesList;
+let recentlyViewedList;
+let filterButtons;
+let themeToggle;
+let popularTeamsGrid;
+let liveGamesGrid;
+
+// Initialize DOM Elements
+function initializeDOMElements() {
+    searchInput = document.querySelector('.search-input');
+    searchButton = document.querySelector('.search-button');
+    searchResults = document.getElementById('search-results');
+    favoritesList = document.getElementById('favorites-list');
+    recentlyViewedList = document.getElementById('recently-viewed-list');
+    filterButtons = document.querySelectorAll('.filter-button');
+    themeToggle = document.getElementById('theme-toggle');
+    popularTeamsGrid = document.getElementById('popular-teams');
+    liveGamesGrid = document.getElementById('live-games');
 }
 
-themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
-    userPreferences.darkMode = document.body.classList.contains('dark-mode');
-    localStorage.setItem('darkMode', userPreferences.darkMode);
-    updateThemeIcon(userPreferences.darkMode);
-});
-
+// Theme Management
 function updateThemeIcon(isDarkMode) {
-    themeToggle.innerHTML = isDarkMode ? 
-        '<i class="fas fa-sun"></i>' : 
-        '<i class="fas fa-moon"></i>';
+    if (themeToggle) {
+        themeToggle.innerHTML = isDarkMode ? 
+            '<i class="fas fa-sun"></i>' : 
+            '<i class="fas fa-moon"></i>';
+    }
 }
 
 // Generate a random user ID if not exists
@@ -47,19 +51,86 @@ function generateUserId() {
     return userId;
 }
 
-// Event Listeners
-searchButton.addEventListener('click', handleSearch);
-searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleSearch();
-});
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize DOM elements
+    initializeDOMElements();
 
-filterButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        filterButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        currentFilter = button.dataset.filter;
-        handleSearch();
-    });
+    // Set up event listeners
+    if (searchButton) {
+        searchButton.addEventListener('click', handleSearch);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSearch();
+        });
+    }
+
+    if (filterButtons) {
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentFilter = button.dataset.filter;
+                handleSearch();
+            });
+        });
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            userPreferences.darkMode = !userPreferences.darkMode;
+            localStorage.setItem('darkMode', userPreferences.darkMode);
+            document.body.classList.toggle('dark-mode', userPreferences.darkMode);
+            updateThemeIcon(userPreferences.darkMode);
+        });
+    }
+
+    // Initialize theme
+    document.body.classList.toggle('dark-mode', userPreferences.darkMode);
+    updateThemeIcon(userPreferences.darkMode);
+
+    // Initialize tab switching
+    const tabs = document.querySelectorAll('.favorite-tab');
+    const teamsContainer = document.getElementById('favorites-teams');
+    const playersContainer = document.getElementById('favorites-players');
+
+    if (tabs.length && teamsContainer && playersContainer) {
+        // Set initial state
+        teamsContainer.style.display = 'block';
+        playersContainer.style.display = 'none';
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Show/hide appropriate content
+                const tabName = tab.dataset.tab;
+                teamsContainer.style.display = tabName === 'teams' ? 'block' : 'none';
+                playersContainer.style.display = tabName === 'players' ? 'block' : 'none';
+
+                // If switching to players tab, refresh the players list
+                if (tabName === 'players') {
+                    loadFavoritePlayers();
+                }
+            });
+        });
+    }
+
+    // Load initial data
+    loadPopularTeams();
+    loadFavorites();
+    loadLiveGames();
+    if (recentlyViewedList) {
+        loadFavoritePlayers();
+        updateRecentlyViewed();
+    }
 });
 
 // Search Handler
@@ -69,53 +140,163 @@ async function handleSearch() {
 
     showLoading();
     try {
-        const response = await fetch(`/api/teams/search/${query}`);
-        if (!response.ok) throw new Error('Search failed');
-        const teams = await response.json();
-        displaySearchResults(teams);
+        // Search for teams
+        const teamsResponse = await fetch(`/api/teams/search/${query}`);
+        if (!teamsResponse.ok) throw new Error('Team search failed');
+        const teams = await teamsResponse.json();
+
+        // Search for players
+        const playersResponse = await fetch(`/api/players/search/${query}`);
+        if (!playersResponse.ok) throw new Error('Player search failed');
+        const players = await playersResponse.json();
+
+        // Display both teams and players
+        await displaySearchResults(teams, players);
     } catch (error) {
         console.error('Search error:', error);
-        searchResults.innerHTML = '<p class="error">Failed to search teams. Please try again.</p>';
+        searchResults.innerHTML = '<p class="error">Failed to search. Please try again.</p>';
     } finally {
         hideLoading();
     }
 }
 
+// Create Team Card
+function createTeamCard(team, isFavorite = false) {
+    const sportEmoji = team.sport === 'Soccer' ? '⚽' : '⚾';
+    return `
+        <div class="team-card" data-team-id="${team._id}">
+            <div class="team-header">
+                <h3><a href="/team.html?id=${team._id}" class="team-link"><span class="team-sport-icon">${sportEmoji}</span> ${team.name}</a></h3>
+                <div class="team-actions">
+                    <button class="favorite-button ${isFavorite ? 'active' : ''}" onclick="toggleFavorite('${team._id}', event)">
+                        <i class="fas fa-star"></i>
+                    </button>
+                    <button class="share-button" onclick="shareTeam('${team._id}')">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <p>${team.ageGroup} • ${team.location}</p>
+            <div class="team-stats">
+                <span><span class="team-stats-icon">🏆</span> ${team.stats.wins}W</span>
+                <span><span class="team-stats-icon">❌</span> ${team.stats.losses}L</span>
+                <span><span class="team-stats-icon">🤝</span> ${team.stats.ties}T</span>
+            </div>
+        </div>
+    `;
+}
+
+// Toggle Favorite
+async function toggleFavorite(teamId, event) {
+    // Prevent the click from bubbling up to the team card
+    if (event) {
+        event.stopPropagation();
+    }
+
+    try {
+        // Check if team is already a favorite
+        const response = await fetch(`/api/favorites/${currentUser}`);
+        if (!response.ok) throw new Error('Failed to fetch favorites');
+        const favorites = await response.json();
+        const isFavorite = favorites.some(fav => fav.teamId === teamId);
+
+        // Toggle the favorite status
+        const method = isFavorite ? 'DELETE' : 'POST';
+        const url = isFavorite ? `/api/favorites/${teamId}?userId=${currentUser}` : '/api/favorites';
+        const body = isFavorite ? null : JSON.stringify({ userId: currentUser, teamId: teamId });
+
+        const toggleResponse = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body
+        });
+
+        if (!toggleResponse.ok) throw new Error('Failed to toggle favorite');
+        
+        // Refresh favorites display and update the star icon
+        loadFavorites();
+        updateStarIcon(teamId, !isFavorite);
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
+    }
+}
+
+// Update star icon for a specific team card
+function updateStarIcon(teamId, isFavorite) {
+    const teamCard = document.querySelector(`.team-card[data-team-id="${teamId}"]`);
+    if (teamCard) {
+        const favoriteButton = teamCard.querySelector('.favorite-button');
+        if (favoriteButton) {
+            favoriteButton.classList.toggle('active', isFavorite);
+            favoriteButton.querySelector('i').className = `fas ${isFavorite ? 'fa-star' : 'fa-star'}`;
+        }
+    }
+}
+
 // Display Search Results
-function displaySearchResults(teams) {
+async function displaySearchResults(teams, players) {
     const filteredTeams = teams.filter(team => 
         currentFilter === 'all' || team.sport.toLowerCase() === currentFilter
     );
 
-    if (filteredTeams.length === 0) {
-        searchResults.innerHTML = '<p>No teams found matching your search.</p>';
+    if (filteredTeams.length === 0 && players.length === 0) {
+        searchResults.innerHTML = '<p>No teams or players found matching your search.</p>';
         return;
     }
 
-    searchResults.innerHTML = filteredTeams.map(team => createTeamCard(team)).join('');
+    let resultsHTML = '';
+
+    try {
+        // Fetch favorites for both teams and players
+        const [teamFavorites, playerFavorites] = await Promise.all([
+            fetch(`/api/favorites/${currentUser}`).then(res => res.json()),
+            fetch(`/api/favorites/players/${currentUser}`).then(res => res.json())
+        ]);
+
+        // Display teams first
+        if (filteredTeams.length > 0) {
+            resultsHTML += '<div class="search-section"><h3>Teams</h3>';
+            resultsHTML += filteredTeams.map(team => 
+                createTeamCard(team, teamFavorites.some(fav => fav.teamId === team._id))
+            ).join('');
+            resultsHTML += '</div>';
+        }
+
+        // Display players second
+        if (players.length > 0) {
+            resultsHTML += '<div class="search-section"><h3>Players</h3>';
+            resultsHTML += players.map(player => `
+                <div class="player-card">
+                    <div class="player-info">
+                        <span class="player-name">${player.name}</span>
+                        <span class="player-details">#${player.number} • ${player.position}</span>
+                        <span class="player-team">${player.teamName}</span>
+                    </div>
+                    <button class="favorite-button ${playerFavorites.some(fav => fav.playerId === player._id) ? 'active' : ''}" 
+                            onclick="toggleFavoritePlayer('${player._id}', '${player.teamId}', event)">
+                        <i class="fas fa-star"></i>
+                    </button>
+                </div>
+            `).join('');
+            resultsHTML += '</div>';
+        }
+
+        // Update the search results with all content
+        updateSearchResults(resultsHTML);
+    } catch (error) {
+        console.error('Error displaying search results:', error);
+        searchResults.innerHTML = '<p>Error displaying search results. Please try again.</p>';
+    }
 }
 
-// Create Team Card
-function createTeamCard(team) {
-    const sportIcon = getSportIcon(team.sport);
-    return `
-        <div class="team-card" data-team-id="${team._id}">
-            <div class="team-header">
-                <img src="${sportIcon}" alt="${team.sport}" class="team-sport-icon">
-                <h3>${team.name}</h3>
-                <button class="share-button" onclick="shareTeam('${team._id}')">
-                    <i class="fas fa-share-alt"></i>
-                </button>
-            </div>
-            <p>${team.sport} • ${team.ageGroup}</p>
-            <p>${team.location}</p>
-            <div class="team-stats">
-                <span>🏆 ${team.stats.wins} Wins</span>
-                <span>💪 ${team.stats.losses} Losses</span>
-                <span>🤝 ${team.stats.ties} Ties</span>
-            </div>
-        </div>
-    `;
+// Update search results
+function updateSearchResults(html) {
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.innerHTML = html;
+    }
 }
 
 // Get Sport Icon
@@ -161,21 +342,49 @@ function hideLoading() {
 
 // Recently Viewed Teams
 function addToRecentlyViewed(team) {
+    if (!team || !team._id) {
+        console.warn('Invalid team data:', team);
+        return;
+    }
     recentlyViewedTeams = [team, ...recentlyViewedTeams.filter(t => t._id !== team._id)].slice(0, 5);
     localStorage.setItem('recentlyViewedTeams', JSON.stringify(recentlyViewedTeams));
     updateRecentlyViewed();
 }
 
 function updateRecentlyViewed() {
-    if (recentlyViewedTeams.length === 0) {
+    if (!recentlyViewedList) {
+        console.warn('Recently viewed list element not found');
+        return;
+    }
+
+    if (!recentlyViewedTeams || recentlyViewedTeams.length === 0) {
         recentlyViewedList.innerHTML = '<p>No recently viewed teams</p>';
         return;
     }
-    recentlyViewedList.innerHTML = recentlyViewedTeams.map(team => createTeamCard(team)).join('');
+
+    // Filter out any invalid teams
+    const validTeams = recentlyViewedTeams.filter(team => team && team._id);
+    
+    if (validTeams.length === 0) {
+        recentlyViewedList.innerHTML = '<p>No recently viewed teams</p>';
+        // Clear invalid data from localStorage
+        localStorage.setItem('recentlyViewedTeams', '[]');
+        recentlyViewedTeams = [];
+        return;
+    }
+
+    recentlyViewedList.innerHTML = validTeams.map(team => createTeamCard(team)).join('');
 }
 
 // Event Delegation for Team Cards
 document.addEventListener('click', (e) => {
+    // First check if we clicked on a favorite button
+    const favoriteButton = e.target.closest('.favorite-button');
+    if (favoriteButton) {
+        return; // Let the button's own click handler handle it
+    }
+
+    // Then check if we clicked on a team card
     const teamCard = e.target.closest('.team-card');
     if (teamCard) {
         const teamId = teamCard.dataset.teamId;
@@ -206,237 +415,408 @@ document.addEventListener('click', (e) => {
             addToRecentlyViewed(teamData);
 
             // Navigate to team page
-            window.location.href = `/team?id=${teamId}`;
+            window.location.href = `/team.html?id=${teamId}`;
         } catch (error) {
             console.error('Error handling team card click:', error);
             // If there's an error, try to navigate with just the ID
-            window.location.href = `/team?id=${teamId}`;
+            window.location.href = `/team.html?id=${teamId}`;
         }
     }
 });
 
 // Favorites
-function loadFavorites() {
-    const localFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    displayFavorites(localFavorites);
-
-    // Then fetch from API
-    fetch('/api/favorites')
-        .then(response => response.json())
-        .then(favorites => {
-            if (favorites.length === 0 && localFavorites.length === 0) {
-                // If no favorites in both localStorage and API, show default favorites
-                const defaultFavorites = [
-                    { id: '1', name: 'Little Giants', sport: 'Baseball', ageGroup: 'U12' },
-                    { id: '2', name: 'Thunder Hawks', sport: 'Soccer', ageGroup: 'U14' },
-                    { id: '3', name: 'Rising Stars', sport: 'Basketball', ageGroup: 'U10' }
-                ];
-                localStorage.setItem('favorites', JSON.stringify(defaultFavorites));
-                displayFavorites(defaultFavorites);
-            } else {
-                localStorage.setItem('favorites', JSON.stringify(favorites));
-                displayFavorites(favorites);
-            }
-        })
-        .catch(error => {
-            console.error('Error loading favorites:', error);
-            // If there's an error, keep showing local favorites
-        });
+async function loadFavorites() {
+    try {
+        const response = await fetch(`/api/favorites/${currentUser}`);
+        if (!response.ok) throw new Error('Failed to fetch favorites');
+        const favorites = await response.json();
+        displayFavorites(favorites);
+    } catch (error) {
+        console.error('Error loading favorites:', error);
+        favoritesList.innerHTML = '<p style="color: #6b7280; text-align: center;">Error loading favorites</p>';
+    }
 }
 
-function displayFavorites(favorites) {
-    if (!favorites || favorites.length === 0) {
-        favoritesList.innerHTML = '<p style="color: #6b7280; text-align: center;">No favorite teams yet</p>';
-        return;
+async function displayFavorites(favorites) {
+    const favoritesTeamsList = document.getElementById('favorites-teams');
+    const favoritesPlayersList = document.getElementById('favorites-players');
+    
+    if (!favoritesTeamsList || !favoritesPlayersList) return;
+
+    // Separate teams and players
+    const teams = favorites.filter(fav => !fav.playerId);
+    const players = favorites.filter(fav => fav.playerId);
+
+    // Display favorite teams
+    if (teams.length > 0) {
+        // Fetch full team data for each favorite team
+        const teamPromises = teams.map(async (fav) => {
+            const response = await fetch(`/api/teams/${fav.teamId}`);
+            if (!response.ok) throw new Error('Failed to fetch team data');
+            const team = await response.json();
+            return team;
+        });
+
+        try {
+            const teamData = await Promise.all(teamPromises);
+            favoritesTeamsList.innerHTML = teamData.map(team => `
+                <div class="favorite-team" data-team-id="${team._id}">
+                    <div class="team-header">
+                        <h3><a href="/team.html?id=${team._id}" class="team-link"><span class="team-sport-icon">${team.sport === 'Soccer' ? '⚽' : '⚾'}</span> ${team.name}</a></h3>
+                        <div class="team-actions">
+                            <button class="favorite-button active" onclick="toggleFavorite('${team._id}', event)">
+                                <i class="fas fa-star"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p>${team.ageGroup} • ${team.location}</p>
+                    <div class="team-stats">
+                        <span><span class="team-stats-icon">🏆</span> ${team.stats?.wins || 0}W</span>
+                        <span><span class="team-stats-icon">❌</span> ${team.stats?.losses || 0}L</span>
+                        <span><span class="team-stats-icon">🤝</span> ${team.stats?.ties || 0}T</span>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error fetching team data:', error);
+            favoritesTeamsList.innerHTML = '<p>Error loading favorite teams</p>';
+        }
+    } else {
+        favoritesTeamsList.innerHTML = '<p>No favorite teams yet</p>';
     }
 
-    favoritesList.innerHTML = favorites.map(team => `
-        <div class="favorite-team" data-team-id="${team.id}">
-            <div>
-                <div class="team-name">${team.name}</div>
-                <div class="team-info">${team.sport} • ${team.ageGroup}</div>
+    // Display favorite players
+    if (players.length > 0) {
+        favoritesPlayersList.innerHTML = players.map(player => `
+            <div class="player-card">
+                <div class="player-info">
+                    <span class="player-name">${player.player.name}</span>
+                    <span class="player-details">#${player.player.number} • ${player.player.position}</span>
+                </div>
+                <button onclick="toggleFavoritePlayer('${player.playerId}', '${player.teamId}', event)" class="remove-favorite">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <button class="remove-favorite" data-team-id="${team.id}">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    `).join('');
-
-    // Add click handlers
-    document.querySelectorAll('.favorite-team').forEach(team => {
-        team.addEventListener('click', (e) => {
-            if (!e.target.closest('.remove-favorite')) {
-                window.location.href = `/team/${team.dataset.teamId}`;
-            }
-        });
-    });
-
-    // Add remove handlers
-    document.querySelectorAll('.remove-favorite').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleFavorite(button.dataset.teamId);
-        });
-    });
+        `).join('');
+    } else {
+        favoritesPlayersList.innerHTML = '<p>No favorite players yet</p>';
+    }
 }
 
-// Toggle favorite
-function toggleFavorite(teamId) {
-    fetch('/api/favorites', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ teamId })
-    })
-    .then(response => response.json())
-    .then(favorites => {
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-        displayFavorites(favorites);
-    })
-    .catch(error => {
-        console.error('Error toggling favorite:', error);
-    });
+async function removeFavorite(teamId) {
+    try {
+        const response = await fetch(`/api/favorites/${teamId}?userId=${currentUser}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('Failed to remove favorite');
+        
+        // Refresh favorites display
+        loadFavorites();
+    } catch (error) {
+        console.error('Error removing favorite:', error);
+        alert('Failed to remove favorite. Please try again.');
+    }
 }
 
 // Load popular teams
-function loadPopularTeams() {
-    fetch('/api/teams')
-        .then(response => response.json())
-        .then(teams => {
-            displayPopularTeams(teams);
-        })
-        .catch(error => {
-            console.error('Error loading teams:', error);
-        });
+async function loadPopularTeams() {
+    try {
+        const response = await fetch('/api/teams');
+        if (!response.ok) throw new Error('Failed to fetch teams');
+        const teams = await response.json();
+
+        // Fetch favorites
+        const favoritesResponse = await fetch(`/api/favorites/${currentUser}`);
+        const favorites = await favoritesResponse.json();
+
+        if (popularTeamsGrid) {
+            popularTeamsGrid.innerHTML = teams.map(team => {
+                const sportEmoji = team.sport === 'Soccer' ? '⚽' : '⚾';
+                const isFavorite = favorites.some(fav => fav.teamId === team._id);
+                return `
+                    <div class="team-card" data-team-id="${team._id}">
+                        <div class="team-header">
+                            <h3><a href="/team.html?id=${team._id}" class="team-link"><span class="team-sport-icon">${sportEmoji}</span> ${team.name}</a></h3>
+                            <div class="team-actions">
+                                <button class="favorite-button ${isFavorite ? 'active' : ''}" onclick="toggleFavorite('${team._id}', event)">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                <button class="share-button" onclick="shareTeam('${team._id}')">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p>${team.ageGroup} • ${team.location}</p>
+                        <div class="team-stats">
+                            <span><span class="team-stats-icon">🏆</span> ${team.stats?.wins || 0}W</span>
+                            <span><span class="team-stats-icon">❌</span> ${team.stats?.losses || 0}L</span>
+                            <span><span class="team-stats-icon">🤝</span> ${team.stats?.ties || 0}T</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch (error) {
+        console.error('Error loading teams:', error);
+        if (popularTeamsGrid) {
+            popularTeamsGrid.innerHTML = '<p style="color: #6b7280; text-align: center;">Error loading teams</p>';
+        }
+    }
 }
 
 // Display popular teams
 function displayPopularTeams(teams) {
-    if (!teams || teams.length === 0) {
-        popularTeamsGrid.innerHTML = '<p style="color: #6b7280; text-align: center;">No teams available</p>';
+    const popularTeamsGrid = document.getElementById('popular-teams');
+    if (!popularTeamsGrid) return;
+
+    if (teams.length === 0) {
+        popularTeamsGrid.innerHTML = '<p>No teams found</p>';
         return;
     }
 
-    popularTeamsGrid.innerHTML = teams.map(team => `
-        <div class="team-card" data-team-id="${team._id}">
-            <div class="team-header">
-                <img src="/images/${team.sport.toLowerCase()}.svg" alt="${team.sport}" class="team-sport-icon">
-                <h3>${team.name}</h3>
-                <button class="share-button" onclick="shareTeam('${team._id}')">
-                    <i class="fas fa-share-alt"></i>
-                </button>
-            </div>
-            <p>${team.sport} • ${team.ageGroup}</p>
-            <p>${team.location}</p>
-            <div class="team-stats">
-                <span>🏆 ${team.stats.wins || 0} Wins</span>
-                <span>💪 ${team.stats.losses || 0} Losses</span>
-                <span>🤝 ${team.stats.ties || 0} Ties</span>
-            </div>
-        </div>
-    `).join('');
-
-    // Add click handlers
-    document.querySelectorAll('.team-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (!e.target.closest('.share-button')) {
-                const teamId = card.dataset.teamId;
-                const teamData = {
-                    _id: teamId,
-                    name: card.querySelector('h3').textContent,
-                    sport: card.querySelector('p').textContent.split('•')[0].trim(),
-                    ageGroup: card.querySelector('p').textContent.split('•')[1].trim(),
-                    location: card.querySelectorAll('p')[1].textContent,
-                    stats: {
-                        wins: parseInt(card.querySelector('.team-stats span:nth-child(1)').textContent.split(' ')[1]) || 0,
-                        losses: parseInt(card.querySelector('.team-stats span:nth-child(2)').textContent.split(' ')[1]) || 0,
-                        ties: parseInt(card.querySelector('.team-stats span:nth-child(3)').textContent.split(' ')[1]) || 0
-                    }
-                };
-                localStorage.setItem(`team_${teamId}`, JSON.stringify(teamData));
-                addToRecentlyViewed(teamData);
-                window.location.href = `/team?id=${teamId}`;
-            }
-        });
+    // Fetch favorite teams for the current user
+    fetchFavorites().then(favorites => {
+        const favoriteTeamIds = new Set(favorites.teams.map(team => team._id));
+        
+        popularTeamsGrid.innerHTML = teams.map(team => 
+            createTeamCard(team, favoriteTeamIds.has(team._id))
+        ).join('');
+    }).catch(error => {
+        console.error('Error fetching favorites:', error);
+        popularTeamsGrid.innerHTML = teams.map(team => createTeamCard(team)).join('');
     });
 }
 
 // Live Games
-function loadLiveGames() {
-    // For demo purposes, we'll create some sample live games with more realistic scores
-    const sampleLiveGames = [
-        {
-            id: 'game1',
-            homeTeam: { name: 'Little Giants', score: 7 },
-            awayTeam: { name: 'Thunder Hawks', score: 2 },
-            sport: 'Baseball',
-            time: '4th Inning',
-            status: 'LIVE'
-        },
-        {
-            id: 'game2',
-            homeTeam: { name: 'Rising Stars', score: 68 },
-            awayTeam: { name: 'Dragon Warriors', score: 42 },
-            sport: 'Basketball',
-            time: 'Q4 2:15',
-            status: 'LIVE'
-        },
-        {
-            id: 'game3',
-            homeTeam: { name: 'Soccer Stars', score: 4 },
-            awayTeam: { name: 'Eagle FC', score: 0 },
-            sport: 'Soccer',
-            time: '78\'',
-            status: 'LIVE'
-        }
-    ];
-
-    displayLiveGames(sampleLiveGames);
+async function loadLiveGames() {
+    try {
+        // For now, using sample data
+        const sampleLiveGames = [
+            {
+                homeTeam: {
+                    name: 'Red Dragons',
+                    _id: '67dee661d38a06b37e23168f',
+                    sport: 'Soccer'
+                },
+                awayTeam: {
+                    name: 'Blue Hawks',
+                    _id: '67dee661d38a06b37e231696',
+                    sport: 'Soccer'
+                },
+                homeScore: 7,
+                awayScore: 2,
+                status: 'Live',
+                time: '65:00'
+            },
+            {
+                homeTeam: {
+                    name: 'Red Dragons',
+                    _id: '67dee661d38a06b37e23168f',
+                    sport: 'Soccer'
+                },
+                awayTeam: {
+                    name: 'Blue Hawks',
+                    _id: '67dee661d38a06b37e231696',
+                    sport: 'Soccer'
+                },
+                homeScore: 2,
+                awayScore: 1,
+                status: 'Live',
+                time: '15:00'
+            },
+            {
+                homeTeam: {
+                    name: 'Green Tigers',
+                    _id: '67dee661d38a06b37e23169d',
+                    sport: 'Baseball'
+                },
+                awayTeam: {
+                    name: 'Red Dragons',
+                    _id: '67dee661d38a06b37e23168f',
+                    sport: 'Baseball'
+                },
+                homeScore: 5,
+                awayScore: 3,
+                status: 'Live',
+                time: '6th Inning'
+            },
+            {
+                homeTeam: {
+                    name: 'Blue Hawks',
+                    _id: '67dee661d38a06b37e231696',
+                    sport: 'Soccer'
+                },
+                awayTeam: {
+                    name: 'Green Tigers',
+                    _id: '67dee661d38a06b37e23169d',
+                    sport: 'Soccer'
+                },
+                homeScore: 4,
+                awayScore: 0,
+                status: 'Live',
+                time: '30:00'
+            }
+        ];
+        displayLiveGames(sampleLiveGames);
+    } catch (error) {
+        console.error('Error loading live games:', error);
+    }
 }
 
+// Display live games
 function displayLiveGames(games) {
-    if (!games || games.length === 0) {
-        liveGamesGrid.innerHTML = '<p style="color: #6b7280; text-align: center;">No live games at the moment</p>';
+    const liveGamesContainer = document.getElementById('live-games');
+    if (!liveGamesContainer) {
+        console.error('Live games container not found');
         return;
     }
 
-    liveGamesGrid.innerHTML = games.map(game => `
-        <div class="live-game-card" data-game-id="${game.id}">
+    if (!games || games.length === 0) {
+        liveGamesContainer.innerHTML = '<p style="color: #6b7280; text-align: center;">No live games at the moment</p>';
+        return;
+    }
+
+    liveGamesContainer.innerHTML = games.map(game => `
+        <div class="live-game-card">
             <div class="game-teams">
                 <div class="game-team">
-                    <img src="/images/${game.sport.toLowerCase()}.svg" alt="${game.sport}" class="team-sport-icon">
-                    <span>${game.homeTeam.name}</span>
-                    <span class="team-score">${game.homeTeam.score}</span>
+                    <span class="team-sport-icon">${game.homeTeam.sport === 'Soccer' ? '⚽' : '⚾'}</span>
+                    <a href="/team.html?id=${game.homeTeam._id}" class="team-link">${game.homeTeam.name}</a>
+                    <span class="team-score">${game.homeScore}</span>
                 </div>
+                <span class="vs">vs</span>
                 <div class="game-team">
-                    <span class="team-score">${game.awayTeam.score}</span>
-                    <span>${game.awayTeam.name}</span>
-                    <img src="/images/${game.sport.toLowerCase()}.svg" alt="${game.sport}" class="team-sport-icon">
+                    <span class="team-sport-icon">${game.homeTeam.sport === 'Soccer' ? '⚽' : '⚾'}</span>
+                    <a href="/team.html?id=${game.awayTeam._id}" class="team-link">${game.awayTeam.name}</a>
+                    <span class="team-score">${game.awayScore}</span>
                 </div>
             </div>
-            <div class="game-info">
-                <span>${game.sport}</span>
-                <span class="game-status">${game.status}</span>
-                <span>${game.time}</span>
+            <div class="game-status">
+                ${game.isLive ? '<span class="live-badge">LIVE</span>' : ''}
+                <span class="game-time">${game.time}</span>
             </div>
         </div>
     `).join('');
-
-    // Add click handlers for live game cards
-    document.querySelectorAll('.live-game-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const gameId = card.dataset.gameId;
-            // Navigate to game details page or show game details modal
-            console.log('Game clicked:', gameId);
-        });
-    });
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    loadFavorites();
-    loadPopularTeams();
-    loadLiveGames();
-    updateRecentlyViewed();
-}); 
+// Toggle Favorite Player
+async function toggleFavoritePlayer(playerId, teamId, event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const button = event.currentTarget;
+    const isFavorite = button.classList.contains('active');
+    
+    try {
+        const response = await fetch(`/api/favorites/players/${isFavorite ? playerId : ''}?userId=${currentUser}`, {
+            method: isFavorite ? 'DELETE' : 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: isFavorite ? undefined : JSON.stringify({
+                userId: currentUser,
+                teamId: teamId,
+                playerId: playerId
+            })
+        });
+
+        if (!response.ok) throw new Error('Failed to toggle favorite');
+
+        button.classList.toggle('active');
+        button.querySelector('i').className = `fas ${isFavorite ? 'fa-star' : 'fa-star'}`;
+        
+        // Refresh favorites display
+        loadFavoritePlayers();
+    } catch (error) {
+        console.error('Error toggling favorite:', error);
+        alert('Failed to update favorites. Please try again.');
+    }
+}
+
+// Load favorite players
+async function loadFavoritePlayers() {
+    try {
+        const response = await fetch(`/api/favorites/players/${currentUser}`);
+        if (!response.ok) throw new Error('Failed to fetch favorite players');
+        const favorites = await response.json();
+        
+        const playersContainer = document.getElementById('favorites-players');
+        if (!playersContainer) {
+            console.error('Favorites players container not found');
+            return;
+        }
+
+        if (!favorites || favorites.length === 0) {
+            playersContainer.innerHTML = 
+                '<p style="color: #6b7280; text-align: center;">No favorite players yet</p>';
+            return;
+        }
+
+        displayFavoritePlayers(favorites);
+    } catch (error) {
+        console.error('Error loading favorite players:', error);
+        const playersContainer = document.getElementById('favorites-players');
+        if (playersContainer) {
+            playersContainer.innerHTML = 
+                '<p style="color: #6b7280; text-align: center;">Error loading favorite players</p>';
+        }
+    }
+}
+
+// Display favorite players
+async function displayFavoritePlayers(favorites) {
+    const playersContainer = document.getElementById('favorites-players');
+    if (!playersContainer) {
+        console.error('Favorites players container not found');
+        return;
+    }
+
+    if (!favorites || favorites.length === 0) {
+        playersContainer.innerHTML = '<p>No favorite players yet</p>';
+        return;
+    }
+
+    try {
+        // Fetch team data for each favorite to get player details
+        const processedFavorites = await Promise.all(favorites.map(async (favorite) => {
+            try {
+                const response = await fetch(`/api/teams/${favorite.teamId}`);
+                if (!response.ok) throw new Error('Failed to fetch team data');
+                const team = await response.json();
+                const player = team.players.find(p => `${team._id}-${p.number}` === favorite.playerId);
+                return {
+                    ...favorite,
+                    player: player || { name: 'Unknown Player', number: '?', position: 'Unknown' },
+                    teamName: team.name
+                };
+            } catch (error) {
+                console.error('Error fetching team data:', error);
+                return {
+                    ...favorite,
+                    player: { name: 'Unknown Player', number: '?', position: 'Unknown' },
+                    teamName: 'Unknown Team'
+                };
+            }
+        }));
+
+        playersContainer.innerHTML = processedFavorites.map(favorite => `
+            <div class="player-card">
+                <div class="player-info">
+                    <span class="player-name">${favorite.player.name}</span>
+                    <span class="player-details">#${favorite.player.number} • ${favorite.player.position}</span>
+                    <span class="player-team">${favorite.teamName}</span>
+                </div>
+                <button class="favorite-button active" onclick="toggleFavoritePlayer('${favorite.playerId}', '${favorite.teamId}', event)">
+                    <i class="fas fa-star"></i>
+                </button>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error processing favorites:', error);
+        playersContainer.innerHTML = '<p>Error loading favorite players</p>';
+    }
+} 

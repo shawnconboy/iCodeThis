@@ -12,6 +12,10 @@ const losses = document.getElementById('losses');
 const ties = document.getElementById('ties');
 const upcomingGames = document.getElementById('upcoming-games');
 const playersGrid = document.getElementById('players-grid');
+const playerModal = document.getElementById('player-modal');
+const modalPlayerName = document.getElementById('modal-player-name');
+const modalPlayerNumber = document.getElementById('modal-player-number');
+const modalPlayerStats = document.getElementById('modal-player-stats');
 
 // Get team ID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -45,9 +49,13 @@ async function loadTeamData() {
         const response = await fetch(`/api/teams/${teamId}`);
         if (response.ok) {
             const team = await response.json();
-            displayTeamData(team);
-            // Update localStorage with fresh data
-            localStorage.setItem(`team_${teamId}`, JSON.stringify(team));
+            if (team) {
+                displayTeamData(team);
+                // Update localStorage with fresh data
+                localStorage.setItem(`team_${teamId}`, JSON.stringify(team));
+            } else if (!localTeamData) {
+                throw new Error('Team not found');
+            }
         } else if (!localTeamData) {
             throw new Error('Team not found');
         }
@@ -129,7 +137,7 @@ function displayPlayers(players) {
     }
 
     const playersList = players.map(player => `
-        <div class="player-card">
+        <div class="player-card" onclick="showPlayerProfile(${JSON.stringify(player).replace(/"/g, '&quot;')})">
             <div class="player-name">${player.name || 'Unknown Player'}</div>
             <div class="player-info">
                 <span>#${player.number || 'N/A'}</span> • ${player.position || 'N/A'}
@@ -139,6 +147,48 @@ function displayPlayers(players) {
 
     playersGrid.innerHTML = playersList;
 }
+
+// Show player profile modal
+function showPlayerProfile(player) {
+    modalPlayerName.textContent = player.name;
+    modalPlayerNumber.textContent = `#${player.number}`;
+    
+    // Generate player stats (you can customize these based on your needs)
+    const stats = [
+        { label: 'Games Played', value: player.stats?.gamesPlayed || 0 },
+        { label: 'Goals', value: player.stats?.goals || 0 },
+        { label: 'Assists', value: player.stats?.assists || 0 },
+        { label: 'Points', value: (player.stats?.goals || 0) + (player.stats?.assists || 0) }
+    ];
+
+    modalPlayerStats.innerHTML = stats.map(stat => `
+        <div class="stat-item">
+            <div class="stat-value">${stat.value}</div>
+            <div class="stat-label">${stat.label}</div>
+        </div>
+    `).join('');
+
+    playerModal.style.display = 'flex';
+}
+
+// Close player modal
+function closePlayerModal() {
+    playerModal.style.display = 'none';
+}
+
+// Close modal when clicking outside
+playerModal.addEventListener('click', (e) => {
+    if (e.target === playerModal) {
+        closePlayerModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && playerModal.style.display === 'flex') {
+        closePlayerModal();
+    }
+});
 
 // Socket.IO event handlers
 socket.on('gameUpdate', (game) => {
