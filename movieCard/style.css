@@ -3,67 +3,79 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
     display: flex;
     justify-content: center;
-    /* Center horizontally */
     align-items: center;
-    /* Center vertically */
-    height: 100vh;
-    /* Full viewport height */
-    background-color: #abc6f3;
-    /* Light background for contrast */
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 20px;
 }
 
 /* Style the container */
 .container {
     background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.595);
+    padding: 24px 40px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     text-align: center;
-    /* Align text in the center */
-    width: 650px;
+    width: 750px;
+    transition: box-shadow 0.3s ease;
+}
+
+.container:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
 }
 
 .one {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 20px;
 }
 
 .two {
     display: flex;
     justify-content: space-between;
-    padding: 10px 0px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .information {
-    /* border: 1px solid; */
-    width: 400px;
+    width: 450px;
     display: flex;
     flex-direction: column;
     justify-content: left;
-    padding: 10px;
+    padding: 12px 20px;
 }
 
 .infoTop {
     text-align: left;
 }
 
-.infoTop>p {
-    padding: 10px 0px;
+.infoTop > p {
+    padding: 8px 0;
+    color: #4a4a4a;
+    line-height: 1.6;
 }
 
 .infoBottom {
     display: flex;
     justify-content: space-between;
+    margin-top: 16px;
 }
 
 a {
     text-decoration: none;
+    color: #2563eb;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #1d4ed8;
 }
 
 li {
@@ -73,10 +85,30 @@ li {
 .three {
     display: flex;
     justify-content: space-between;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #f0f0f0;
 }
 
 .price {
     display: flex;
     justify-content: space-between;
-    width: 200px;
+    width: 220px;
+    background: #f8fafc;
+    padding: 10px 24px;
+    border-radius: 4px;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+/* Add modern typography */
+h1, h2, h3, h4, h5, h6 {
+    color: #1e293b;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* Add smooth transitions */
+* {
+    transition: all 0.2s ease;
 }
