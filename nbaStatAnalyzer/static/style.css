@@ -92,7 +92,6 @@ button:hover {
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    transition: transform 0.2s;
 }
 
 /* Image Row */
@@ -124,4 +123,53 @@ button:hover {
     border-radius: 8px;
     font-weight: bold;
     font-size: 1.1rem;
+}
+
+/* Mini Player Cards (Today's Players) */
+#todayPlayers {
+    max-width: 900px;
+    margin: 0 auto 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.mini-card {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 15px;
+    width: 180px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.mini-card img {
+    width: 80px;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.mini-card h4 {
+    margin: 10px 0 4px;
+    font-size: 1rem;
+}
+
+.mini-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.mini-card button {
+    margin-top: 10px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
 }

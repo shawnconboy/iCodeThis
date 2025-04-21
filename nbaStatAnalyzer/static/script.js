@@ -27,14 +27,10 @@ toggleBtn.addEventListener('click', () => {
     }
 });
 
-// Player stat fetch
-document.getElementById('searchForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    const playerName = document.getElementById('playerName').value;
-
-    const response = await fetch(`http://127.0.0.1:5000/api/player?name=${encodeURIComponent(playerName)}`);
+// Reusable player stat fetcher
+async function fetchPlayerStats(name) {
+    const response = await fetch(`http://127.0.0.1:5000/api/player?name=${encodeURIComponent(name)}`);
     const data = await response.json();
-
     const resultDiv = document.getElementById('result');
     resultDiv.innerHTML = "";
 
@@ -73,4 +69,44 @@ document.getElementById('searchForm').addEventListener('submit', async function 
 
         resultDiv.innerHTML = html;
     }
+}
+
+// Handle search form submit
+document.getElementById('searchForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const playerName = document.getElementById('playerName').value;
+    fetchPlayerStats(playerName);
 });
+
+// Load today's players on homepage
+async function loadTodayPlayers() {
+    const res = await fetch("http://127.0.0.1:5000/api/today_players");
+    const players = await res.json();
+    const container = document.getElementById("todayPlayers");
+    container.innerHTML = "";
+
+    if (players.length === 0) {
+        container.innerHTML = "<p style='text-align:center;'>No top players in action today.</p>";
+        return;
+    }
+
+    players.forEach(player => {
+        const headshot = `https://cdn.nba.com/headshots/nba/latest/1040x760/${player.player_id}.png`;
+        const logo = `https://cdn.nba.com/logos/nba/${player.team_id}/global/L/logo.svg`;
+
+        const card = document.createElement("div");
+        card.className = "mini-card";
+        card.innerHTML = `
+            <img src="${headshot}" alt="${player.full_name}">
+            <h4>${player.full_name}</h4>
+            <p>${player.position}</p>
+            <img src="${logo}" alt="${player.team}" style="width:30px; height:auto;">
+            <button onclick="fetchPlayerStats('${player.full_name}')">View Stats</button>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+// Load mini cards on page load
+window.onload = loadTodayPlayers;
