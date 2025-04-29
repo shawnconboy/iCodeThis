@@ -4,9 +4,33 @@ from nba_api.stats.static import players
 from nba_api.stats.endpoints import playercareerstats, commonplayerinfo, playergamelog
 import pandas as pd
 import datetime
+import threading
 
 app = Flask(__name__)
 CORS(app)
+
+# Cache player list in memory for fast suggestions
+player_list_cache = None
+player_list_lock = threading.Lock()
+
+def get_player_list():
+    global player_list_cache
+    with player_list_lock:
+        if player_list_cache is None:
+            player_list_cache = players.get_players()
+        return player_list_cache
+
+@app.route('/api/player_suggestions')
+def player_suggestions():
+    query = request.args.get('q', '').strip().lower()
+    if not query:
+        return jsonify([])
+    player_list = get_player_list()
+    # Prioritize active players, then sort alphabetically
+    matches = [p for p in player_list if query in p['full_name'].lower()]
+    matches.sort(key=lambda x: (not x['is_active'], x['full_name']))
+    # Return up to 10 suggestions (full_name only)
+    return jsonify([p['full_name'] for p in matches[:10]])
 
 def get_player_data(player_name):
     player_list = players.get_players()

@@ -1,14 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA Stat Analyzer</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <button id="themeToggle" class="theme-toggle">🌙</button>
-
     <h1>NBA Stat Analyzer</h1>
     <form id="searchForm">
-        <input type="text" id="playerName" placeholder="Enter player name..." required>
+        <input type="text" id="playerName" placeholder="Enter player name..." required autocomplete="off">
+        <div id="suggestions" class="suggestions"></div>
         <button type="submit">Search</button>
     </form>
     <div id="result"></div>
-
     <script src="script.js"></script>
 </body>
+</html>

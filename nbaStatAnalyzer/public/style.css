@@ -61,7 +61,36 @@ input[type="text"] {
     border-radius: 6px;
     background-color: var(--card);
     color: var(--text);
+    position: relative;
 }
+
+.suggestions {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 55px;
+    width: 300px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    z-index: 1000;
+    max-height: 240px;
+    overflow-y: auto;
+    display: none;
+}
+.suggestion {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: var(--text);
+    transition: background 0.2s;
+}
+.suggestion:hover,
+.suggestion.selected {
+    background: var(--accent);
+    color: #fff;
+}
+
 
 button {
     padding: 10px 15px;
